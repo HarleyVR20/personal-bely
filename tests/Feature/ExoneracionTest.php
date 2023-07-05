@@ -23,30 +23,13 @@ class ExoneracionTest extends TestCase
         $this->user = User::factory()->create();
         $this->actingAs($this->user);
     }
-    /**
-     * Test the index method of EmpleadoController.
-     *
-     * @return void
-     */
-    public function test_exoneracion_screen_can_be_rendered(): void
-    {
-        $response = $this->get(route('empleados'));
-
-        $response->assertStatus(200);
-        $response->assertViewIs('admin.empleado');
-        $response->assertViewHasAll([
-            'empleadoId',
-            'columns',
-            'data',
-        ]);
-    }
 
     /**
      * Test the index method of ExoneracionController.
      *
      * @return void
      */
-    public function testIndex()
+    public function test_exoneracion_screen_can_be_rendered(): void
     {
         $response = $this->get(route('exoneraciones'));
 
@@ -59,14 +42,15 @@ class ExoneracionTest extends TestCase
         ]);
     }
 
+
     /**
      * Test the getData method of ExoneracionController.
      *
      * @return void
      */
-    public function testGetData()
+    public function test_exoneracion_get_data()
     {
-        $exoneraciones = factory(Exoneracion::class, 5)->create();
+        $exoneraciones = Exoneracion::factory()->create(5);
 
         $response = $this->get(route('exoneraciones.get-data'));
 
@@ -79,7 +63,7 @@ class ExoneracionTest extends TestCase
      *
      * @return void
      */
-    public function testStore()
+    public function test_exoneracion_store()
     {
         $data = [
             'i_selectEmpleado' => 1,
@@ -100,7 +84,7 @@ class ExoneracionTest extends TestCase
      *
      * @return void
      */
-    public function testUpdate()
+    public function test_exoneracion_update()
     {
         $exoneracion = Exoneracion::factory()->create();
 
@@ -123,7 +107,7 @@ class ExoneracionTest extends TestCase
      *
      * @return void
      */
-    public function testDestroy()
+    public function test_exoneracion_destroy()
     {
         $exoneracion = Exoneracion::factory()->create();
 
@@ -131,6 +115,6 @@ class ExoneracionTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJson(['message' => 'Eliminación realizada con éxito']);
-        $this->assertDeleted($exoneracion);
+        $this->assertSoftDeleted($exoneracion);
     }
 }
