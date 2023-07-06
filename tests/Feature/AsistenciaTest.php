@@ -4,14 +4,18 @@ namespace Tests\Feature;
 
 use App\Models\Asistencia;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 
 class AsistenciaTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
+    use WithoutMiddleware;
+    use SoftDeletes;
 
     protected $user;
 
@@ -29,7 +33,7 @@ class AsistenciaTest extends TestCase
      */
     public function test_asistencia_screen_can_be_rendered(): void
     {
-        $response = $this->get('/personal/personal/asistencia');
+        $response = $this->get('/personal/asistencias', ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertViewIs('admin.asistencia');
@@ -40,7 +44,19 @@ class AsistenciaTest extends TestCase
     {
         $asistencia = Asistencia::factory()->create();
 
-        $response = $this->getJson('/personal/personal/asistencia/data');
+        $response = $this->postJson('/personal/asistencias/data', [
+            'id' => null,
+            'empleado_id' => null,
+            'empleado' => null,
+            'area_id' => null,
+            'área' => null,
+            'día' => null,
+            'hora entrada' => null,
+            'hora salida' => null,
+            'estado' => null,
+            'creado en' => null,
+            'actualizado en' => null,
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
@@ -51,7 +67,6 @@ class AsistenciaTest extends TestCase
             'hora entrada' => $asistencia->hora_entrada,
             'hora salida' => $asistencia->hora_salida,
             'estado' => $asistencia->estado,
-            // ...comprobar otros campos
         ]);
     }
     public function test_asistencia_store(): void
@@ -65,7 +80,7 @@ class AsistenciaTest extends TestCase
             // ...otros campos necesarios
         ];
 
-        $response = $this->post('/personal/personal/asistencia', $data);
+        $response = $this->post('/personal/asistencias', $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $this->assertDatabaseHas('asistencias', [
@@ -89,7 +104,7 @@ class AsistenciaTest extends TestCase
             // ...otros campos necesarios
         ];
 
-        $response = $this->put('/personal/asistencia/' . $asistencia->id, $data);
+        $response = $this->put('/personal/asistencias/' . $asistencia->id, $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $this->assertDatabaseHas('asistencias', [
@@ -108,10 +123,11 @@ class AsistenciaTest extends TestCase
     {
         $asistencia = Asistencia::factory()->create();
 
-        $response = $this->delete('/personal/asistencia/' . $asistencia->id);
+        $response = $this->delete('/personal/asistencias/' . $asistencia->id, [], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $this->assertSoftDeleted($asistencia);
+        $this->assertSoftDeleted('asistencias', ['id' => $asistencia->id]);
     }
 
     /**

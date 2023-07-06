@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Area;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,10 @@ class CargoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'area_id' => function () {
+                return Area::factory()->create()->id;
+            },
+            'nombre' => $this->faker->word,
         ];
     }
 }

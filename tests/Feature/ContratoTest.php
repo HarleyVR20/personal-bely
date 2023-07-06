@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Contrato;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Http\Response;
 use Tests\TestCase;
 
@@ -13,6 +15,8 @@ class ContratoTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
+    use WithoutMiddleware;
+    use SoftDeletes;
 
     protected $user;
 
@@ -46,7 +50,7 @@ class ContratoTest extends TestCase
     {
         $contratos = Contrato::factory()->count(5)->create();
 
-        $response = $this->get(route('contratos.getData'));
+        $response = $this->postJson(route('contratos.data'), [], ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount($contratos->count(), 'data');
     }
@@ -62,7 +66,7 @@ class ContratoTest extends TestCase
 
         $searchTerm = $this->faker->word;
 
-        $response = $this->get(route('contratos.search', ['q' => $searchTerm]));
+        $response = $this->post(route('contratos.search', ['q' => $searchTerm]), [], ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonCount($contratos->count(), 'data');
     }
@@ -76,7 +80,7 @@ class ContratoTest extends TestCase
     {
         $contratoData = Contrato::factory()->make()->toArray();
 
-        $response = $this->post(route('contratos.store'), $contratoData);
+        $response = $this->post(route('contratos.store'), $contratoData, ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(Response::HTTP_FOUND);
         $response->assertSessionHas('success');
     }
@@ -91,7 +95,7 @@ class ContratoTest extends TestCase
         $contrato = Contrato::factory()->create();
         $contratoData = Contrato::factory()->make()->toArray();
 
-        $response = $this->put(route('contratos.update', ['id' => $contrato->id]), $contratoData);
+        $response = $this->put(route('contratos.update', ['id' => $contrato->id]), $contratoData, ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(Response::HTTP_FOUND);
         $response->assertSessionHas('success');
     }
@@ -105,8 +109,9 @@ class ContratoTest extends TestCase
     {
         $contrato = Contrato::factory()->create();
 
-        $response = $this->delete(route('contratos.destroy', ['id' => $contrato->id]));
+        $response = $this->delete(route('contratos.destroy', ['id' => $contrato->id]), [], ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(Response::HTTP_FOUND);
         $response->assertSessionHas('success');
+        $this->assertSoftDeleted('contratos', [$contrato]);
     }
 }

@@ -17,7 +17,8 @@ class TipoContratoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'tipo' => $this->faker->word,
+            'plazo' => $this->faker->randomFloat(8, 0, 24),
         ];
     }
 }

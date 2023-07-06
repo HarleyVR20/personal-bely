@@ -13,6 +13,16 @@ class DeleteAccountTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $user;
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Crear un usuario y autenticarlo
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+    }
+
     public function test_user_accounts_can_be_deleted(): void
     {
         if (! Features::hasAccountDeletionFeatures()) {

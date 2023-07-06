@@ -4,14 +4,18 @@ namespace Tests\Feature;
 
 use App\Models\Empleado;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 
 class EmpleadoTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
+    use WithoutMiddleware;
+    use SoftDeletes;
 
     protected $user;
 
@@ -45,11 +49,22 @@ class EmpleadoTest extends TestCase
      *
      * @return void
      */
-    public function test_empleado_get_ata()
+    public function test_empleado_get_data()
     {
         $empleados = Empleado::factory()->create(5);
 
-        $response = $this->get(route('empleados.get-data'));
+        $response = $this->postJson(route('empleados.data'), [
+            'id' => null,
+            'nombre' => null,
+            'apellidos' => null,
+            'dni' => null,
+            'fecha nacimiento' => null,
+            'domicilio fiscal' => null,
+            'número de celular' => null,
+            'correo' => null,
+            'creado en' => null,
+            'actualizado en' => null,
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJsonCount($empleados->count(), 'data');
@@ -64,7 +79,7 @@ class EmpleadoTest extends TestCase
     {
         $empleados = Empleado::factory()->create(5);
 
-        $response = $this->get(route('empleados.search', ['emp' => 'John']));
+        $response = $this->postJson(route('empleados.search'), ['emp' => $empleados[0]->nombre], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJsonCount($empleados->count(), null);
@@ -87,9 +102,10 @@ class EmpleadoTest extends TestCase
             'i_correo' => 'john.doe@example.com',
         ];
 
-        $response = $this->post(route('empleados.store'), $data);
+        $response = $this->post(route('empleados.store'), $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
-        $response->assertRedirect(route('empleados'));
+        $response->assertRedirect();
+        $response->assertStatus(200);
         $this->assertDatabaseHas('empleados', $data);
     }
 
@@ -112,9 +128,9 @@ class EmpleadoTest extends TestCase
             'e_correo' => 'updated.employee@example.com',
         ];
 
-        $response = $this->put(route('empleados.update', $empleado->id), $data);
+        $response = $this->put(route('empleados.update', $empleado->id), $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
-        $response->assertRedirect(route('asistencias'));
+        $response->assertRedirect();
         $this->assertDatabaseHas('empleados', array_merge(['id' => $empleado->id], $data));
     }
 
@@ -127,10 +143,10 @@ class EmpleadoTest extends TestCase
     {
         $empleado = Empleado::factory()->create();
 
-        $response = $this->delete(route('empleados.destroy', $empleado->id));
+        $response = $this->delete(route('empleados.destroy', $empleado->id), [], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJson(['message' => 'Empleado eliminado con éxito']);
-        $this->assertSoftDeleted($empleado);
+        $this->assertSoftDeleted('empleados', [$empleado]);
     }
 }

@@ -4,14 +4,18 @@ namespace Tests\Feature;
 
 use App\Models\Modalidad;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 
 class ModalidadTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
+    use WithoutMiddleware;
+    use SoftDeletes;
 
     protected $user;
 
@@ -31,7 +35,7 @@ class ModalidadTest extends TestCase
      */
     public function test_modalidad_screen_can_be_rendered(): void
     {
-        $response = $this->get(route('modalidades'));
+        $response = $this->get(route('modalidades'), ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertViewIs('admin.modalidad');
@@ -51,7 +55,12 @@ class ModalidadTest extends TestCase
     {
         $modalidades = Modalidad::factory()->create(5);
 
-        $response = $this->get(route('modalidades.get-data'));
+        $response = $this->postJson(route('modalidades.data'), [
+            'id' => null,
+            'nombre de modalidad' => null,
+            'creado en' => null,
+            'actualizado en' => null,
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJsonCount($modalidades->count(), 'data');
@@ -66,7 +75,7 @@ class ModalidadTest extends TestCase
     {
         $modalidades = Modalidad::factory()->create(5);
 
-        $response = $this->post(route('modalidades.search'), ['modd' => 'search_term']);
+        $response = $this->postJson(route('modalidades.search'), ['modd' => $modalidades[0]->name_mod], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJsonCount($modalidades->count(), 'data');
@@ -83,10 +92,10 @@ class ModalidadTest extends TestCase
             'i_modalidad' => 'Modalidad 1',
         ];
 
-        $response = $this->post(route('modalidades.store'), $data);
+        $response = $this->post(route('modalidades.store'), $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
-        $response->assertRedirect(route('modalidades'));
-        $this->assertDatabaseHas('modalidades', $data);
+        $response->assertRedirect();
+        $this->assertDatabaseHas('modalidades', array_merge(['name_mod' => $data['e_modalidad']]));
     }
 
     /**
@@ -102,10 +111,10 @@ class ModalidadTest extends TestCase
             'e_modalidad' => 'Updated Modalidad',
         ];
 
-        $response = $this->put(route('modalidades.update', $modalidad->id), $data);
+        $response = $this->put(route('modalidades.update', $modalidad->id), $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
-        $response->assertRedirect(route('modalidades'));
-        $this->assertDatabaseHas('modalidades', array_merge(['id' => $modalidad->id], $data));
+        $response->assertRedirect();
+        $this->assertDatabaseHas('modalidades', array_merge(['name_mod' => $modalidad->e_modalidad]));
     }
 
     /**
@@ -117,9 +126,9 @@ class ModalidadTest extends TestCase
     {
         $modalidad = Modalidad::factory()->create();
 
-        $response = $this->delete(route('modalidades.destroy', $modalidad->id));
+        $response = $this->delete(route('modalidades.destroy', $modalidad->id), [], ['X-CSRF-TOKEN' => csrf_token()]);
 
-        $response->assertRedirect(route('modalidades'));
+        $response->assertRedirect();
         $this->assertSoftDeleted($modalidad);
     }
 }

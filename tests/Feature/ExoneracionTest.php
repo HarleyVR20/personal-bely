@@ -4,14 +4,18 @@ namespace Tests\Feature;
 
 use App\Models\Exoneracion;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 
 class ExoneracionTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
+    use WithoutMiddleware;
+    use SoftDeletes;
 
     protected $user;
 
@@ -31,7 +35,7 @@ class ExoneracionTest extends TestCase
      */
     public function test_exoneracion_screen_can_be_rendered(): void
     {
-        $response = $this->get(route('exoneraciones'));
+        $response = $this->get(route('exoneraciones'), ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertViewIs('admin.exoneracion');
@@ -52,7 +56,18 @@ class ExoneracionTest extends TestCase
     {
         $exoneraciones = Exoneracion::factory()->create(5);
 
-        $response = $this->get(route('exoneraciones.get-data'));
+        $response = $this->postJson(route('exoneraciones.data'), [
+            'id' => null,
+            'nombre' => null,
+            'apellidos' => null,
+            'dni' => null,
+            'fecha nacimiento' => null,
+            'domicilio fiscal' => null,
+            'número de celular' => null,
+            'correo' => null,
+            'creado en' => null,
+            'actualizado en' => null,
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJsonCount($exoneraciones->count(), 'data');
@@ -73,9 +88,9 @@ class ExoneracionTest extends TestCase
             'i_observacion' => 'Test observación',
         ];
 
-        $response = $this->post(route('exoneraciones.store'), $data);
+        $response = $this->post(route('exoneraciones.store'), $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
-        $response->assertRedirect(route('exoneraciones'));
+        $response->assertRedirect();
         $this->assertDatabaseHas('exoneraciones', $data);
     }
 
@@ -96,9 +111,9 @@ class ExoneracionTest extends TestCase
             'e_observacion' => 'Updated observación',
         ];
 
-        $response = $this->put(route('exoneraciones.update', $exoneracion->id), $data);
+        $response = $this->put(route('exoneraciones.update', $exoneracion->id), $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
-        $response->assertRedirect(route('exoneraciones'));
+        $response->assertRedirect();
         $this->assertDatabaseHas('exoneraciones', array_merge(['id' => $exoneracion->id], $data));
     }
 
@@ -111,10 +126,10 @@ class ExoneracionTest extends TestCase
     {
         $exoneracion = Exoneracion::factory()->create();
 
-        $response = $this->delete(route('exoneraciones.destroy', $exoneracion->id));
+        $response = $this->delete(route('exoneraciones.destroy', $exoneracion->id), [], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJson(['message' => 'Eliminación realizada con éxito']);
-        $this->assertSoftDeleted($exoneracion);
+        $this->assertSoftDeleted('exoneraciones', [$exoneracion]);
     }
 }

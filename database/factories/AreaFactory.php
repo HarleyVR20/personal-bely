@@ -19,7 +19,6 @@ class AreaFactory extends Factory
         return [
             'gerencia' => substr($this->faker->word, 1, 100),
             'sub_area' => substr($this->faker->word, 1, 100),
-            ''
         ];
     }
 }

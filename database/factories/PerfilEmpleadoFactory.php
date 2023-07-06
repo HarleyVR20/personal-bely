@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Empleado;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,11 @@ class PerfilEmpleadoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'empleado_id' => function () {
+                return Empleado::factory()->create()->id;
+            },
+            'profesion' => $this->faker->jobTitle,
+            'cuenta_bancaria' => $this->faker->bankAccountNumber,
         ];
     }
 }

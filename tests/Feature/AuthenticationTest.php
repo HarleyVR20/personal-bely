@@ -25,7 +25,7 @@ class AuthenticationTest extends TestCase
         $response = $this->post('/personal/login', [
             'email' => $user->email,
             'password' => 'password',
-        ]);
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $this->assertAuthenticated();
         $response->assertRedirect(RouteServiceProvider::HOME);
@@ -38,7 +38,7 @@ class AuthenticationTest extends TestCase
         $this->post('/personal/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
-        ]);
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $this->assertGuest();
     }

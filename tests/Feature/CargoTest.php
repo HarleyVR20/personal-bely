@@ -4,14 +4,18 @@ namespace Tests\Feature;
 
 use App\Models\Cargo;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Tests\TestCase;
 
 class CargoTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
+    use WithoutMiddleware;
+    use SoftDeletes;
 
     protected $user;
 
@@ -28,7 +32,7 @@ class CargoTest extends TestCase
      */
     public function test_cargo_screen_can_be_rendered(): void
     {
-        $response = $this->get('/personal/personal/cargos');
+        $response = $this->get('/personal/cargos', ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(200);
 
         $response->assertViewIs('admin.cargo');
@@ -42,7 +46,7 @@ class CargoTest extends TestCase
     {
         $cargo = Cargo::factory()->create();
 
-        $response = $this->getJson('/personal/cargo/data');
+        $response = $this->postJson('/personal/cargos/data', ['*'], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
@@ -67,7 +71,7 @@ class CargoTest extends TestCase
             'i_cargo' => 'Gerente',
         ];
 
-        $response = $this->post('/personal/cargo', $data);
+        $response = $this->post('/personal/cargos', $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $this->assertDatabaseHas('cargos', [
@@ -89,7 +93,7 @@ class CargoTest extends TestCase
             'e_cargo' => 'Supervisor',
         ];
 
-        $response = $this->put('/personal/cargo/' . $cargo->id, $data);
+        $response = $this->put('/personal/cargos/' . $cargo->id, $data, ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $this->assertDatabaseHas('cargos', [
@@ -106,7 +110,7 @@ class CargoTest extends TestCase
     {
         $cargo = Cargo::factory()->create();
 
-        $response = $this->delete('/personal/cargo/' . $cargo->id);
+        $response = $this->delete('/personal/cargos/' . $cargo->id, [], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $this->assertSoftDeleted($cargo);

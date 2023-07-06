@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Recorte;
+use App\Models\Remuneracion;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +19,12 @@ class RemuneracionRecorteFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'remuneracion_id' => function () {
+                return Remuneracion::factory()->create()->id;
+            },
+            'recorte_id' => function () {
+                return Recorte::factory()->create()->id;
+            },
         ];
     }
 }

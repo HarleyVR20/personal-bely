@@ -17,7 +17,8 @@ class TipoRecorteFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'description' => $this->faker->paragraph,
+            'tipo' => $this->faker->boolean,
         ];
     }
 }

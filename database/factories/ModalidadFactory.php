@@ -17,7 +17,7 @@ class ModalidadFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name_mod' => $this->faker->word,
         ];
     }
 }

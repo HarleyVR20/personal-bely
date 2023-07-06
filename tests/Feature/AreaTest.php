@@ -2,8 +2,10 @@
 
 use App\Models\Area;
 use App\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
@@ -11,6 +13,8 @@ class AreaTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
+    use WithoutMiddleware;
+    use SoftDeletes;
 
     protected $user;
 
@@ -25,13 +29,13 @@ class AreaTest extends TestCase
 
     public function test_area_screen_can_be_rendered(): void
     {
-        $response = $this->get('/personal/areas');
+        $response = $this->get('/personal/areas', ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(200);
     }
 
     public function test_area_index_returns_view(): void
     {
-        $response = $this->get('/personal/areas');
+        $response = $this->get('/personal/areas', ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(200);
         $response->assertViewIs('admin.area');
         $response->assertViewHasAll([
@@ -43,13 +47,14 @@ class AreaTest extends TestCase
 
     public function test_area_data_returns_valid_json(): void
     {
-        $response = $this->post('/personal/areas/data', [
-            'id',
-            'gerencia',
-            'sub area',
-            'creado en',
-            'actualizado en',
-        ], ['X-Requested-With' => 'XMLHttpRequest']);
+        $response = $this->postJson('/personal/areas/data', [
+            'id' => null,
+            'gerencia' => null,
+            'sub area' => null,
+            'creado en' => null,
+            'actualizado en' => null,
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
+
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonStructure([
             'data' => [
@@ -66,9 +71,10 @@ class AreaTest extends TestCase
 
     public function test_area_search_returns_valid_json(): void
     {
-        $term = $this->faker->word;
+        $area = Area::factory()->create();
+        $term = $area->gerencia;
 
-        $response = $this->post('/personal/areas/search', ['q' => $term]);
+        $response = $this->postJson('/personal/areas/search', ['q' => $term], ['X-CSRF-TOKEN' => csrf_token()]);
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonStructure([
             '*' => [
@@ -86,7 +92,7 @@ class AreaTest extends TestCase
         $response = $this->post('/personal/areas', [
             'i_gerencia' => $gerencia,
             'i_sub_area' => $subArea,
-        ]);
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
@@ -107,7 +113,7 @@ class AreaTest extends TestCase
         $response = $this->put(route('areas.update', ['id' => $area->id]), [
             'e_gerencia' => $newGerencia,
             'e_sub_area' => $newSubArea,
-        ]);
+        ], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
@@ -122,12 +128,12 @@ class AreaTest extends TestCase
     {
         $area = Area::factory()->create();
 
-        $response = $this->delete(route('areas.destroy', ['id' => $area->id]));
+        $response = $this->delete(route('areas.destroy', ['id' => $area->id]), [], ['X-CSRF-TOKEN' => csrf_token()]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
 
-        $this->assertSoftDeleted($area);
+        $this->assertSoftDeleted('areas', ['id' => $area->id]);
     }
 
 
