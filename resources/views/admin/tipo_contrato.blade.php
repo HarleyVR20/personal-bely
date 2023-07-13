@@ -106,7 +106,7 @@
             tipoContratoId = tipo_contrato.id;
             $('#editarTipoModal input[name="e_id"]').val(tipo_contrato.id);
             $('#editarTipoModal input[name="e_tipo_contrato"]').val(tipo_contrato['tipo de contrato']);
-            $('#editarTipoModal input[name="e_plazo"]').val(tipo_contrato.plazo);
+            $('#editarTipoModal input[name="e_plazo"]').val(tipo_contrato['plazo en meses']);
 
             // Actualizar el atributo 'route' del componente EditModal con la nueva ruta
             var route = '{{ route('tipo-contratos.update', ['id' => ':id']) }}'
@@ -138,8 +138,8 @@
                         name: 'tipo de contrato'
                     },
                     {
-                        data: 'plazo',
-                        name: 'plazo'
+                        data: 'plazo en meses',
+                        name: 'plazo en meses'
                     },
                     {
                         data: 'creado en',

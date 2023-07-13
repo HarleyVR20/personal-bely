@@ -82,7 +82,7 @@
             'onClick': () => {
                 $('#registrarAreaExcelModal').modal('show'); // Invocar al modal de registro por excel
             },
-        }, { 
+        }, {
             'name': 'editarAreas',
             'onClick': (button) => {
                 var area = JSON.parse(button.getAttribute('data-area')); // Analizar la cadena JSON en un objeto

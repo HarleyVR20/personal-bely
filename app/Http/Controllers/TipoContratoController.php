@@ -19,7 +19,7 @@ class TipoContratoController extends Controller
         $columns = [
             'id',
             'tipo de contrato',
-            'plazo',
+            'plazo en meses',
             'creado en',
             'actualizado en',
             'opciones'
@@ -71,7 +71,7 @@ class TipoContratoController extends Controller
             return [
                 'id' => $tipo_contrato->id,
                 'tipo de contrato' => $tipo_contrato->tipo,
-                'plazo' => $tipo_contrato->plazo,
+                'plazo en meses' => $tipo_contrato->plazo,
                 'creado en' => optional($tipo_contrato->created_at)->toDateTimeString(),
                 'actualizado en' => optional($tipo_contrato->updated_at)->toDateTimeString(),
             ];
@@ -128,7 +128,7 @@ class TipoContratoController extends Controller
         // Crea un nuevo objeto TipoContrato con los datos validados
         $tipo_contrato = TipoContrato::create([
             'tipo' => $validatedData['i_tipo_contrato'],
-            'plazo' => $validatedData['i_plazo']
+            'plazo en meses' => $validatedData['i_plazo']
         ]);
 
         // Redirige a la ruta 'tipo-contratos' y muestra un mensaje de éxito
@@ -156,7 +156,7 @@ class TipoContratoController extends Controller
         // Actualiza los campos del objeto TipoContrato con los datos validados
         $tipo_contrato->update([
             'tipo' => $validatedData['e_tipo_contrato'],
-            'plazo' => $validatedData['e_plazo']
+            'plazo en meses' => $validatedData['e_plazo']
         ]);
 
         // Redirige a la ruta 'tipo-contratos' y muestra un mensaje de éxito
